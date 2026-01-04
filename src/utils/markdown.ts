@@ -27,6 +27,11 @@ const normalizeText = (node: Content): string => {
   return '';
 };
 
+const KEY_RESPONSIBILITY = 'responsibility';
+const KEY_SUMMARY = 'summary';
+const KEY_STACK = 'stack';
+const KEY_CONTRIBUTIONS = 'contributions';
+
 const parseExperienceHeading = (heading: Heading): Experience => {
   const title = heading.children.map(normalizeText).join(' ');
   const [position = '', company = '', duration = ''] = title.split(/[|｜]/).map((s) => s.trim());
@@ -55,6 +60,19 @@ const extractNestedListItems = (item: ListItem): string[] => {
   const nestedList = item.children.find((child) => child.type === 'list') as List | undefined;
   if (!nestedList) return [];
   return nestedList.children.map((child) => listItemText(child as ListItem)).filter(Boolean);
+};
+
+const extractKeyValue = (text: string): { key: string; value: string } | null => {
+  const [rawKey, ...rest] = text.split(':');
+  if (!rawKey || rest.length === 0) return null;
+  return { key: rawKey.trim().toLowerCase(), value: rest.join(':').trim() };
+};
+
+const parseContributionGroup = (item: ListItem): ContributionGroup | null => {
+  const title = listItemText(item);
+  const nested = extractNestedListItems(item);
+  if (!title && !nested.length) return null;
+  return { title: title || '贡献', items: nested.length ? nested : [title] };
 };
 
 export const parseMarkdown = (markdown: string): Resume => {
@@ -152,33 +170,50 @@ export const parseMarkdown = (markdown: string): Resume => {
     }
 
     if (currentSection === SECTION_WORK && currentExperience) {
-      if (node.type === 'paragraph') {
-        const text = normalizeText(node as Paragraph);
-        if (text.startsWith('工作职责')) {
-          currentExperience.responsibilities = text.replace(/^工作职责[：:]\s*/, '');
-        } else if (currentProject) {
-          if (text.startsWith('项目描述')) {
-            currentProject.description = text.replace(/^项目描述[：:]\s*/, '');
-          } else if (text.startsWith('技术栈')) {
-            currentProject.techStack = text.replace(/^技术栈[：:]\s*/, '');
+      if (node.type === 'list' && !currentProject) {
+        const list = node as List;
+        list.children.forEach((item) => {
+          const kv = extractKeyValue(listItemText(item as ListItem));
+          if (kv?.key === KEY_RESPONSIBILITY) {
+            currentExperience.responsibilities = kv.value;
           }
-        }
+        });
       }
 
       if (node.type === 'list' && currentProject) {
         const list = node as List;
-        const groups: ContributionGroup[] = [];
         list.children.forEach((item) => {
-          const title = listItemText(item as ListItem);
-          const nestedItems = extractNestedListItems(item as ListItem);
-          if (nestedItems.length) {
-            groups.push({ title, items: nestedItems });
-          } else {
-            groups.push({ title: '主要贡献', items: [title] });
+          const text = listItemText(item as ListItem);
+          const kv = extractKeyValue(text);
+          const nested = extractNestedListItems(item as ListItem);
+
+          if (kv?.key === KEY_SUMMARY) {
+            currentProject.description = kv.value;
+            return;
+          }
+          if (kv?.key === KEY_STACK) {
+            currentProject.techStack = kv.value;
+            return;
+          }
+          if (kv?.key === KEY_CONTRIBUTIONS || (!kv && nested.length)) {
+            const nestedList = item.children.find((child) => child.type === 'list') as List | undefined;
+            if (nestedList) {
+              nestedList.children.forEach((nestedItem) => {
+                const group = parseContributionGroup(nestedItem as ListItem);
+                if (group) currentProject.contributions.push(group);
+              });
+              return;
+            }
+            if (kv?.value) {
+              currentProject.contributions.push({ title: '贡献', items: [kv.value] });
+              return;
+            }
+          }
+
+          if (nested.length) {
+            currentProject.contributions.push({ title: text, items: nested });
           }
         });
-
-        currentProject.contributions.push(...groups);
       }
     }
   });
@@ -256,16 +291,17 @@ export const resumeToMarkdown = (resume: Resume): string => {
   resume.experiences.forEach((exp) => {
     lines.push(`### ${exp.position} ｜ ${exp.company} ｜ ${exp.start}–${exp.end}`);
     if (exp.responsibilities) {
-      lines.push(`- 工作职责：${exp.responsibilities}`);
+      lines.push(`- ${KEY_RESPONSIBILITY}: ${exp.responsibilities}`);
     }
     exp.projects.forEach((project) => {
       lines.push('', `#### ${project.name}`);
-      if (project.description) lines.push(`- 项目描述：${project.description}`);
-      if (project.techStack) lines.push(`- 技术栈：${project.techStack}`);
+      if (project.description) lines.push(`- ${KEY_SUMMARY}: ${project.description}`);
+      if (project.techStack) lines.push(`- ${KEY_STACK}: ${project.techStack}`);
       if (project.contributions.length) {
-        lines.push(`- 主要贡献`);
+        lines.push(`- ${KEY_CONTRIBUTIONS}:`);
         project.contributions.forEach((group) => {
-          lines.push(`  - ${group.title}`);
+          const titleLine = group.title && group.title !== '贡献' ? `  - ${group.title}` : '  -';
+          lines.push(titleLine);
           group.items.forEach((item) => lines.push(`    - ${item}`));
         });
       }
