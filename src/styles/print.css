@@ -1,0 +1,35 @@
+@media print {
+  :root {
+    background: #fff;
+  }
+
+  body {
+    margin: 0;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .app,
+  .layout,
+  .panel,
+  .actions {
+    display: block !important;
+  }
+
+  .panel,
+  .actions {
+    display: none !important;
+  }
+
+  .page {
+    box-shadow: none;
+    border: none;
+    width: 210mm;
+    min-height: 297mm;
+    padding: 28mm 26mm;
+    page-break-after: always;
+  }
+
+  .page:last-child {
+    page-break-after: auto;
+  }
+}
