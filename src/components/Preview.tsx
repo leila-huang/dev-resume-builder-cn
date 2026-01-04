@@ -23,30 +23,67 @@ const Preview = ({ resume, settings }: PreviewProps) => {
     const blocks: React.ReactNode[] = [];
 
     // Basics block
+    const summaryItems = [
+      resume.basics.title && `职位：${resume.basics.title}`,
+      resume.basics.yearsOfExperience && `工作年限：${resume.basics.yearsOfExperience}`,
+      resume.basics.gender && `性别：${resume.basics.gender}`,
+      resume.basics.birth && `出生：${resume.basics.birth}`,
+      resume.basics.location && `城市：${resume.basics.location}`
+    ].filter(Boolean);
+
+    const contactItems = [
+      resume.basics.contact?.phone && `手机：${resume.basics.contact.phone}`,
+      resume.basics.contact?.email && `邮箱：${resume.basics.contact.email}`,
+      resume.basics.contact?.wechat && `微信：${resume.basics.contact.wechat}`,
+      resume.basics.github && `GitHub：${resume.basics.github}`,
+      resume.basics.website && `Website：${resume.basics.website}`
+    ].filter(Boolean);
+
+    const eduItems =
+      resume.education.length > 0
+        ? resume.education.map(
+            (edu) =>
+              [edu.school, edu.major, edu.degree, edu.graduation && `毕业：${edu.graduation}`]
+                .filter(Boolean)
+                .join(' ｜ ')
+          )
+        : [
+            [resume.basics.school, resume.basics.major, resume.basics.degree, resume.basics.graduation && `毕业：${resume.basics.graduation}`]
+              .filter(Boolean)
+              .join(' ｜ ')
+          ];
+
     blocks.push(
       <section className="block" data-block key="basics">
         <h1 style={{ fontSize: settings.nameSize }}>{resume.basics.name || '姓名'}</h1>
         <div className="meta-row">
-          <span style={{ fontSize: settings.bodySize }}>
-            {[resume.basics.gender && `性别：${resume.basics.gender}`, resume.basics.birth && `出生：${resume.basics.birth}`, resume.basics.yearsOfExperience && `工作年限：${resume.basics.yearsOfExperience}`]
-              .filter(Boolean)
-              .join(' ｜ ')}
-          </span>
-          <span className="muted" style={{ fontSize: settings.bodySize }}>
-            {[resume.basics.degree && `学历：${resume.basics.degree}`, resume.basics.school && `学校：${resume.basics.school}`, resume.basics.major && `专业：${resume.basics.major}`, resume.basics.graduation && `毕业：${resume.basics.graduation}`]
-              .filter(Boolean)
-              .join(' ｜ ')}
-          </span>
-          <span className="muted" style={{ fontSize: settings.bodySize }}>
-            {[
-              resume.basics.contact?.email && `邮箱：${resume.basics.contact.email}`,
-              resume.basics.contact?.phone && `手机：${resume.basics.contact.phone}`,
-              resume.basics.contact?.wechat && `微信：${resume.basics.contact.wechat}`,
-              resume.basics.contact?.city && `城市：${resume.basics.contact.city}`
-            ]
-              .filter(Boolean)
-              .join(' ｜ ')}
-          </span>
+          <ul className="pill-list">
+            {summaryItems.map((text, idx) => (
+              <li key={`summary-${idx}`} className="pill" style={{ fontSize: settings.bodySize }}>
+                {text}
+              </li>
+            ))}
+          </ul>
+          {contactItems.length > 0 && (
+            <ul className="pill-list muted">
+              {contactItems.map((text, idx) => (
+                <li key={`contact-${idx}`} className="pill" style={{ fontSize: settings.bodySize }}>
+                  {text}
+                </li>
+              ))}
+            </ul>
+          )}
+          {eduItems.filter(Boolean).length > 0 && (
+            <ul className="pill-list muted">
+              {eduItems
+                .filter(Boolean)
+                .map((text, idx) => (
+                  <li key={`edu-${idx}`} className="pill" style={{ fontSize: settings.bodySize }}>
+                    {text}
+                  </li>
+                ))}
+            </ul>
+          )}
         </div>
       </section>
     );

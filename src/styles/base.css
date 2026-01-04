@@ -227,6 +227,22 @@ body {
   color: var(--text-tertiary);
 }
 
+.pill-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: 0;
+  margin: 0;
+}
+
+.pill {
+  border: 1px solid var(--border-color);
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #fafafa;
+}
+
 .page-break {
   break-before: page;
 }
