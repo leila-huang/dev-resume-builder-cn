@@ -1,0 +1,19 @@
+{
+  "name": "dev-resume-builder-cn",
+  "version": "0.0.1",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leila-huang/dev-resume-builder-cn.git"
+  },
+  "author": "leila",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/leila-huang/dev-resume-builder-cn/issues"
+  },
+  "homepage": "https://github.com/leila-huang/dev-resume-builder-cn#readme",
+  "description": ""
+}
