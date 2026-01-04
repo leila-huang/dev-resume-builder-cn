@@ -87,6 +87,19 @@ const KEY_SUMMARY = 'summary';
 const KEY_STACK = 'stack';
 const KEY_CONTRIBUTIONS = 'contributions';
 
+const extractKeyAndMaybeValue = (text: string): { key: string; value: string } | { key: string; value?: undefined } | null => {
+  // 支持英文/中文冒号；允许空 value（例如 `contributions:`）
+  const match = text.match(/^([^:：]+)[:：]\s*(.*)$/);
+  if (!match) return null;
+  const rawKey = match[1].trim();
+  const rawValue = match[2] ?? '';
+  const value = rawValue.trim();
+  const key = rawKey.toLowerCase().replace(/[*_`]/g, '').trim();
+  if (!key) return null;
+  if (!value) return { key };
+  return { key, value };
+};
+
 const parseExperienceHeading = (heading: Heading): Experience => {
   const title = heading.children.map(normalizeText).join(' ');
   const [position = '', company = '', duration = ''] = title.split(/[|｜]/).map((s) => s.trim());
@@ -136,8 +149,25 @@ const parseContributionGroup = (item: ListItem): ContributionGroup | null => {
   return { title: title || '贡献', items: nested.length ? nested : [title] };
 };
 
+const stringifyMdastNodes = (nodes: Content[]): string => {
+  const root: Root = { type: 'root', children: nodes };
+  return unified()
+    .use(remarkStringify, {
+      bullet: '-',
+      rule: '-',
+      listItemIndent: 'one',
+      fences: true,
+      emphasis: '*'
+    })
+    .stringify(root)
+    .trim();
+};
+
 export const parseMarkdown = (markdown: string): Resume => {
-  const lines = markdown.split(/\r?\n/);
+  // Normalize tabs to spaces to avoid markdown parser treating nested lists as code blocks
+  // (common when users paste content with \t indentation)
+  const normalizedInput = markdown.replace(/\t/g, '  ');
+  const lines = normalizedInput.split(/\r?\n/);
   let cursor = 0;
 
   const frontMatter: Record<string, string> = {};
@@ -155,7 +185,37 @@ export const parseMarkdown = (markdown: string): Resume => {
     if (lines[cursor]?.trim() === '---') cursor += 1;
   }
 
-  const tree = processor.parse(lines.slice(cursor).join('\n')) as Root;
+  // Extra: make `contributions:` blocks more forgiving by indenting subsequent lines into the list item
+  // when the author forgot to indent them (so they still belong to contributions).
+  const normalizeContributionsIndent = (raw: string): string => {
+    const lns = raw.split(/\r?\n/);
+    const out: string[] = [];
+    for (let i = 0; i < lns.length; i += 1) {
+      const line = lns[i];
+      out.push(line);
+      const m = line.match(/^(\s*)-\s*contributions\s*[:：].*$/i);
+      if (!m) continue;
+      const baseIndent = m[1] ?? '';
+      const targetIndent = `${baseIndent}  `;
+      for (let j = i + 1; j < lns.length; j += 1) {
+        const next = lns[j];
+        if (!next.trim()) {
+          continue;
+        }
+        // Stop when we hit a new peer list item (same indent) or a new heading
+        if (next.startsWith(baseIndent) && next.match(new RegExp(`^${baseIndent}-\\s+`))) break;
+        if (next.match(/^#{2,4}\s+/)) break;
+        if (next.startsWith(targetIndent)) continue;
+        // If line is at the same indent level, indent it into the contributions list item
+        if (next.startsWith(baseIndent)) {
+          lns[j] = `${targetIndent}${next.slice(baseIndent.length)}`;
+        }
+      }
+    }
+    return lns.join('\n');
+  };
+
+  const tree = processor.parse(normalizeContributionsIndent(lines.slice(cursor).join('\n'))) as Root;
   const resume: Resume = {
     basics: { name: '', contact: {} },
     coreAbilities: [],
@@ -259,38 +319,92 @@ export const parseMarkdown = (markdown: string): Resume => {
 
       if (node.type === 'list' && currentProject) {
         const list = node as List;
-        list.children.forEach((item) => {
-          const text = listItemText(item as ListItem);
+        // Support both:
+        // 1) legacy nested groups under `contributions:`
+        // 2) free-form markdown blocks (bold titles + lists), even if author uses tabs / forgets indentation
+        for (let idx = 0; idx < list.children.length; idx += 1) {
+          const item = list.children[idx] as ListItem;
+          const text = listItemText(item);
           const kv = extractKeyValue(text);
-          const nested = extractNestedListItems(item as ListItem);
+          const keyOnly = extractKeyAndMaybeValue(text);
+          const nested = extractNestedListItems(item);
 
           if (kv?.key === KEY_SUMMARY) {
             currentProject.description = kv.value;
-            return;
+            continue;
           }
           if (kv?.key === KEY_STACK) {
             currentProject.techStack = kv.value;
-            return;
+            continue;
           }
-          if (kv?.key === KEY_CONTRIBUTIONS || (!kv && nested.length)) {
-            const nestedList = item.children.find((child) => child.type === 'list') as List | undefined;
-            if (nestedList) {
+
+          const isContributions = kv?.key === KEY_CONTRIBUTIONS || keyOnly?.key === KEY_CONTRIBUTIONS;
+          if (isContributions) {
+            const li = item;
+            const children = (li.children || []) as Content[];
+            const nestedList = children.find((child) => child.type === 'list') as List | undefined;
+
+            // Heuristic: if it's exactly the legacy nested-list groups format, keep old parsing for nicer layout
+            const looksLikeLegacyGroups =
+              !!nestedList &&
+              nestedList.children.length > 0 &&
+              nestedList.children.every((c) => (c as ListItem).children?.some((cc) => (cc as Content).type === 'list'));
+
+            if (looksLikeLegacyGroups && nestedList) {
               nestedList.children.forEach((nestedItem) => {
                 const group = parseContributionGroup(nestedItem as ListItem);
                 if (group) currentProject.contributions.push(group);
               });
-              return;
+              continue;
             }
-            if (kv?.value) {
-              currentProject.contributions.push({ title: '贡献', items: [kv.value] });
-              return;
+
+            // Build markdown without the literal `contributions:` prefix.
+            const parts: string[] = [];
+            if (kv?.value) parts.push(kv.value);
+
+            // Include nested list / other child nodes, excluding the key paragraph.
+            const contentNodes = children.filter((child) => {
+              if (child.type !== 'paragraph') return true;
+              const pText = normalizeText(child as Paragraph).toLowerCase().replace(/[*_`]/g, '').trim();
+              // remove both `contributions:` and `contributions: xxx`
+              return !(pText === `${KEY_CONTRIBUTIONS}:` || pText.startsWith(`${KEY_CONTRIBUTIONS}:`));
+            });
+            if (contentNodes.length) parts.push(stringifyMdastNodes(contentNodes));
+
+            // Also accept subsequent list items (same list) as part of contributions until next key-value item.
+            // This supports authors writing:
+            // - contributions: **A**
+            //   - ...
+            // - **B**
+            //   - ...
+            for (let j = idx + 1; j < list.children.length; j += 1) {
+              const nextItem = list.children[j] as ListItem;
+              const nextText = listItemText(nextItem);
+              const nextKv = extractKeyAndMaybeValue(nextText);
+              if (nextKv?.key === KEY_SUMMARY || nextKv?.key === KEY_STACK || nextKv?.key === KEY_CONTRIBUTIONS) break;
+
+              const nextChildren = (nextItem.children || []) as Content[];
+              const nextNestedList = nextChildren.find((c) => c.type === 'list') as List | undefined;
+              const title = nextText.trim();
+              if (title) parts.push(title);
+              if (nextNestedList) parts.push(stringifyMdastNodes([nextNestedList]));
+              idx = j; // skip consumed items in the outer loop
             }
+
+            const md = parts
+              .map((p) => p.trim())
+              .filter(Boolean)
+              .join('\n\n')
+              .trim();
+
+            if (md) currentProject.contributionsMarkdown = md;
+            continue;
           }
 
           if (nested.length) {
             currentProject.contributions.push({ title: text, items: nested });
           }
-        });
+        }
       }
     }
   });
@@ -374,7 +488,12 @@ export const resumeToMarkdown = (resume: Resume): string => {
       lines.push('', `#### ${project.name}`);
       if (project.description) lines.push(`- ${KEY_SUMMARY}: ${project.description}`);
       if (project.techStack) lines.push(`- ${KEY_STACK}: ${project.techStack}`);
-      if (project.contributions.length) {
+      if (project.contributionsMarkdown?.trim()) {
+        lines.push(`- ${KEY_CONTRIBUTIONS}:`);
+        // indent the block under contributions
+        const md = project.contributionsMarkdown.trim().split('\n');
+        md.forEach((line) => lines.push(`  ${line}`));
+      } else if (project.contributions.length) {
         lines.push(`- ${KEY_CONTRIBUTIONS}:`);
         project.contributions.forEach((group) => {
           const titleLine = group.title && group.title !== '贡献' ? `  - ${group.title}` : '  -';

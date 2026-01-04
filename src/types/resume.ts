@@ -31,6 +31,11 @@ export interface Project {
   name: string;
   description?: string;
   techStack?: string;
+  /**
+   * Raw markdown block for contributions (preferred).
+   * Keeps author formatting like **bold**, lists, etc.
+   */
+  contributionsMarkdown?: string;
   contributions: ContributionGroup[];
 }
 
@@ -67,4 +72,13 @@ export interface TypographySettings {
   lineHeight: number;
   fontFamily: string;
   experienceStyle: ExperienceStyle;
+  /**
+   * Word-like spacing between content blocks (paragraphs / list items), in px.
+   * Use ONE value to avoid element-specific special cases.
+   */
+  contentGapPx: number;
+  pagePaddingTopMm: number;
+  pagePaddingBottomMm: number;
+  pagePaddingLeftMm: number;
+  pagePaddingRightMm: number;
 }

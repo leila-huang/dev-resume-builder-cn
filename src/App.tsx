@@ -14,7 +14,12 @@ const defaultSettings: TypographySettings = {
   nameSize: 26,
   lineHeight: 1.4,
   fontFamily: 'Inter, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif',
-  experienceStyle: 'standard'
+  experienceStyle: 'standard',
+  contentGapPx: 8,
+  pagePaddingTopMm: 8,
+  pagePaddingBottomMm: 8,
+  pagePaddingLeftMm: 8,
+  pagePaddingRightMm: 8
 };
 
 function App() {
@@ -48,6 +53,8 @@ function App() {
   const handleExportPdf = async () => {
     const container = document.querySelector('.page-container') as HTMLElement | null;
     if (container) {
+      // Note: For best quality, consider using the Print function (Ctrl/Cmd+P -> Save as PDF)
+      // which uses the browser's native PDF rendering
       await exportPdfFromPages(container, 'resume.pdf');
     }
   };

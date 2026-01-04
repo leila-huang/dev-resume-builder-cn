@@ -71,6 +71,17 @@ const SettingsPanel = ({ settings, onChange }: SettingsPanelProps) => {
           />
         </label>
         <label>
+          内容间隔 (px)
+          <input
+            type="number"
+            min={0}
+            max={16}
+            step={1}
+            value={settings.contentGapPx}
+            onChange={(e) => handleNumberChange('contentGapPx', Number(e.target.value))}
+          />
+        </label>
+        <label>
           中文字体
           <select
             value={settings.fontFamily}
@@ -95,6 +106,50 @@ const SettingsPanel = ({ settings, onChange }: SettingsPanelProps) => {
               </option>
             ))}
           </select>
+        </label>
+        <label>
+          页面上边距 (mm)
+          <input
+            type="number"
+            min={2}
+            max={20}
+            step={1}
+            value={settings.pagePaddingTopMm}
+            onChange={(e) => handleNumberChange('pagePaddingTopMm', Number(e.target.value))}
+          />
+        </label>
+        <label>
+          页面下边距 (mm)
+          <input
+            type="number"
+            min={2}
+            max={20}
+            step={1}
+            value={settings.pagePaddingBottomMm}
+            onChange={(e) => handleNumberChange('pagePaddingBottomMm', Number(e.target.value))}
+          />
+        </label>
+        <label>
+          页面左边距 (mm)
+          <input
+            type="number"
+            min={2}
+            max={20}
+            step={1}
+            value={settings.pagePaddingLeftMm}
+            onChange={(e) => handleNumberChange('pagePaddingLeftMm', Number(e.target.value))}
+          />
+        </label>
+        <label>
+          页面右边距 (mm)
+          <input
+            type="number"
+            min={2}
+            max={20}
+            step={1}
+            value={settings.pagePaddingRightMm}
+            onChange={(e) => handleNumberChange('pagePaddingRightMm', Number(e.target.value))}
+          />
         </label>
       </div>
     </div>
