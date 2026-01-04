@@ -1,4 +1,4 @@
-import { TypographySettings } from '../types/resume';
+import type { ExperienceStyle, TypographySettings } from '../types/resume';
 
 interface SettingsPanelProps {
   settings: TypographySettings;
@@ -9,6 +9,12 @@ const fontOptions = [
   'Inter, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif',
   '"PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif',
   '"Source Han Sans SC", "Noto Sans SC", "Microsoft YaHei", sans-serif'
+];
+
+const experienceStyleOptions: { value: ExperienceStyle; label: string }[] = [
+  { value: 'standard', label: '标准（推荐）' },
+  { value: 'compact', label: '紧凑（内容多）' },
+  { value: 'impact', label: '强调成果（指标高亮）' }
 ];
 
 const SettingsPanel = ({ settings, onChange }: SettingsPanelProps) => {
@@ -73,6 +79,19 @@ const SettingsPanel = ({ settings, onChange }: SettingsPanelProps) => {
             {fontOptions.map((font) => (
               <option key={font} value={font}>
                 {font}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          工作经历风格
+          <select
+            value={settings.experienceStyle}
+            onChange={(e) => onChange({ ...settings, experienceStyle: e.target.value as ExperienceStyle })}
+          >
+            {experienceStyleOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
               </option>
             ))}
           </select>

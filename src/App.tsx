@@ -13,7 +13,8 @@ const defaultSettings: TypographySettings = {
   headingSize: 15,
   nameSize: 26,
   lineHeight: 1.4,
-  fontFamily: 'Inter, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif'
+  fontFamily: 'Inter, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif',
+  experienceStyle: 'standard'
 };
 
 function App() {

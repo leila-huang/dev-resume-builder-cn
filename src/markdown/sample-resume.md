@@ -1,5 +1,3 @@
-# 张三
-
 ---
 name: 张三
 gender: 男
@@ -16,6 +14,8 @@ education_major: 软件工程
 education_degree: 统招本科
 education_gradYear: 2018
 ---
+
+# 张三
 
 ## 核心能力
 - 具备丰富的前端架构与组件化经验，能够主导高并发场景下的性能优化与质量保障。

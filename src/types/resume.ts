@@ -58,10 +58,13 @@ export interface Resume {
   education: Education[];
 }
 
+export type ExperienceStyle = "standard" | "compact" | "impact";
+
 export interface TypographySettings {
   bodySize: number;
   headingSize: number;
   nameSize: number;
   lineHeight: number;
   fontFamily: string;
+  experienceStyle: ExperienceStyle;
 }

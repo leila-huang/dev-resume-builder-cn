@@ -1,9 +1,46 @@
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
-import type { Root, Heading, List, ListItem, Paragraph, Text, Content } from 'mdast';
+import type { Root, Heading, List, ListItem, Paragraph, Text, Content, Strong, Emphasis, InlineCode, Link, Break } from 'mdast';
 import type { Basics, ContributionGroup, Education, Experience, Project, Resume } from '../types/resume';
 
+// {{CHENGQI:
+// Action: Added; Timestamp: 2026-01-04 14:50:00 +08:00; Reason: Task #25471ab4, 创建灵活的section识别机制;
+// }}
+// {{START MODIFICATIONS}}
+// Section type identifiers (internal use)
+const SECTION_TYPE_CORE = '__CORE_ABILITIES__';
+const SECTION_TYPE_WORK = '__WORK_EXPERIENCE__';
+const SECTION_TYPE_EDU = '__EDUCATION__';
+
+/**
+ * 识别section标题类型，支持多种标题变体
+ * @param title - section标题文本
+ * @returns section类型标识符，如果无法识别则返回null
+ */
+const identifySectionType = (title: string): string | null => {
+  const normalized = title.trim().replace(/\s+/g, '');
+  
+  // 核心能力/技能变体识别
+  if (/^(核心能力|技能|专业技能|技术能力|核心竞争力|技术栈|个人优势|个人亮点)$/.test(normalized)) {
+    return SECTION_TYPE_CORE;
+  }
+  
+  // 工作经历变体识别
+  if (/^(工作经历|工作经验|项目经验|工作履历|项目经历)$/.test(normalized)) {
+    return SECTION_TYPE_WORK;
+  }
+  
+  // 教育经历变体识别
+  if (/^(教育经历|教育背景)$/.test(normalized)) {
+    return SECTION_TYPE_EDU;
+  }
+  
+  return null;
+};
+// {{END MODIFICATIONS}}
+
+// Legacy constants for backward compatibility (used in resumeToMarkdown)
 const SECTION_CORE = '核心能力';
 const SECTION_WORK = '工作经历';
 const SECTION_EDU = '教育经历';
@@ -19,9 +56,27 @@ const stringifyProcessor = unified().use(remarkParse).use(remarkStringify, {
 });
 
 const normalizeText = (node: Content): string => {
-  if (node.type === 'text') return (node as Text).value.trim();
+  if (node.type === 'text') return (node as Text).value;
+  if (node.type === 'strong') {
+    const inner = (node as Strong).children.map(normalizeText).join('');
+    return `**${inner}**`;
+  }
+  if (node.type === 'emphasis') {
+    const inner = (node as Emphasis).children.map(normalizeText).join('');
+    return `*${inner}*`;
+  }
+  if (node.type === 'inlineCode') {
+    return `\`${(node as InlineCode).value}\``;
+  }
+  if (node.type === 'link') {
+    const link = node as Link;
+    const text = link.children.map(normalizeText).join('');
+    return link.url ? `[${text}](${link.url})` : text;
+  }
+  if (node.type === 'break') {
+    return '\n';
+  }
   if ('children' in node) {
-    // @ts-expect-error narrowing children
     return (node.children as Content[]).map(normalizeText).join('').trim();
   }
   return '';
@@ -63,9 +118,15 @@ const extractNestedListItems = (item: ListItem): string[] => {
 };
 
 const extractKeyValue = (text: string): { key: string; value: string } | null => {
-  const [rawKey, ...rest] = text.split(':');
-  if (!rawKey || rest.length === 0) return null;
-  return { key: rawKey.trim().toLowerCase(), value: rest.join(':').trim() };
+  // 支持英文/中文冒号；同时允许 value 内出现冒号
+  const match = text.match(/^([^:：]+)[:：]\s*(.+)$/);
+  if (!match) return null;
+  const rawKey = match[1].trim();
+  const value = match[2].trim();
+  // 允许用户误把 key 加粗/加 code（例如 **responsibility**:），这里做一次兜底
+  const key = rawKey.toLowerCase().replace(/[*_`]/g, '').trim();
+  if (!key || !value) return null;
+  return { key, value };
 };
 
 const parseContributionGroup = (item: ListItem): ContributionGroup | null => {
@@ -123,11 +184,22 @@ export const parseMarkdown = (markdown: string): Resume => {
       if (heading.depth === 1) {
         resume.basics.name = heading.children.map(normalizeText).join(' ').trim();
       } else if (heading.depth === 2) {
-        currentSection = heading.children.map(normalizeText).join(' ').trim();
-        if (currentSection !== SECTION_WORK) {
+        // {{CHENGQI:
+        // Action: Modified; Timestamp: 2026-01-04 14:51:00 +08:00; Reason: Task #25471ab4, 使用灵活的section识别;
+        // }}
+        // {{START MODIFICATIONS}}
+        const headingText = heading.children.map(normalizeText).join(' ').trim();
+        const sectionType = identifySectionType(headingText);
+        if (sectionType) {
+          currentSection = sectionType;
+        } else {
+          currentSection = headingText; // fallback to original text
+        }
+        if (currentSection !== SECTION_TYPE_WORK) {
           flushExperience();
         }
-      } else if (heading.depth === 3 && currentSection === SECTION_WORK) {
+        // {{END MODIFICATIONS}}
+      } else if (heading.depth === 3 && currentSection === SECTION_TYPE_WORK) {
         if (currentProject) {
           currentExperience?.projects.push(currentProject);
           currentProject = null;
@@ -136,7 +208,7 @@ export const parseMarkdown = (markdown: string): Resume => {
           resume.experiences.push(currentExperience);
         }
         currentExperience = parseExperienceHeading(heading);
-      } else if (heading.depth === 4 && currentSection === SECTION_WORK) {
+      } else if (heading.depth === 4 && currentSection === SECTION_TYPE_WORK) {
         if (currentProject) {
           currentExperience?.projects.push(currentProject);
         }
@@ -145,7 +217,11 @@ export const parseMarkdown = (markdown: string): Resume => {
       return;
     }
 
-    if (node.type === 'list' && currentSection === SECTION_CORE) {
+    // {{CHENGQI:
+    // Action: Modified; Timestamp: 2026-01-04 14:52:00 +08:00; Reason: Task #25471ab4, 更新section类型比较;
+    // }}
+    // {{START MODIFICATIONS}}
+    if (node.type === 'list' && currentSection === SECTION_TYPE_CORE) {
       const list = node as List;
       list.children.forEach((item) => {
         const text = listItemText(item as ListItem);
@@ -153,7 +229,8 @@ export const parseMarkdown = (markdown: string): Resume => {
       });
     }
 
-    if (node.type === 'list' && currentSection === SECTION_EDU) {
+    if (node.type === 'list' && currentSection === SECTION_TYPE_EDU) {
+    // {{END MODIFICATIONS}}
       const list = node as List;
       list.children.forEach((item) => {
         const parts = listItemText(item as ListItem).split(/[|｜]/).map((s) => s.trim());
@@ -169,7 +246,7 @@ export const parseMarkdown = (markdown: string): Resume => {
       });
     }
 
-    if (currentSection === SECTION_WORK && currentExperience) {
+    if (currentSection === SECTION_TYPE_WORK && currentExperience) {
       if (node.type === 'list' && !currentProject) {
         const list = node as List;
         list.children.forEach((item) => {

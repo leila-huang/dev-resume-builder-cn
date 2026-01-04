@@ -1,7 +1,8 @@
 :root {
   color: #111;
   background-color: #f7f7f7;
-  font-family: 'Inter', 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+  font-family: "Inter", "PingFang SC", "Noto Sans SC", "Microsoft YaHei",
+    sans-serif;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -83,7 +84,7 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: var(--space-3);
-  font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
   font-size: 12px;
   line-height: 1.5;
   resize: vertical;
@@ -173,29 +174,197 @@ body {
   margin: 0 0 var(--space-3);
 }
 
+.resume-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-bottom: var(--space-2);
+}
+
+.resume-name {
+  margin: 0;
+}
+
+.resume-title {
+  margin-top: 2px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.resume-header-right {
+  text-align: right;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.resume-contact {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.resume-inline-item:not(:last-child)::after {
+  content: " | ";
+  color: var(--text-tertiary);
+  margin: 0 4px;
+}
+
 .resume h2 {
   font-size: 15px;
   font-weight: 600;
   margin: var(--space-6) 0 var(--space-2);
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border-color);
 }
 
+/* {{CHENGQI:
+   Action: Modified; Timestamp: 2026-01-04 15:00:00 +08:00; Reason: Task #308af31b, 加粗工作经历和项目标题;
+   }} */
+/* {{START MODIFICATIONS}} */
 .resume h3 {
   font-size: 13px;
   margin: var(--space-4) 0 var(--space-2);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .resume h4 {
   font-size: 12px;
   margin: var(--space-3) 0 var(--space-2);
-  font-weight: 600;
+  font-weight: 700;
 }
+/* {{END MODIFICATIONS}} */
 
 .resume p {
   margin: var(--space-1) 0 var(--space-2);
   color: var(--text-secondary);
   font-size: 12px;
   line-height: 1.5;
+}
+
+.exp-title {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  align-items: baseline;
+}
+
+.exp-title-right {
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.exp-summary {
+  margin-top: 2px;
+}
+
+.exp-subsection {
+  margin-top: 10px;
+}
+
+.exp-subtitle {
+  font-weight: 700;
+  margin: var(--space-3) 0 var(--space-2);
+  color: #111;
+}
+
+.project {
+  margin-top: var(--space-3);
+}
+
+.project-desc {
+  margin-top: 2px;
+  color: var(--text-tertiary);
+}
+
+.project-stack {
+  color: var(--text-tertiary);
+}
+
+.project-stack .label {
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+
+.contrib-title {
+  margin-top: var(--space-3);
+  margin-bottom: 2px;
+  padding-left: 18px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+
+.contrib-title::before {
+  content: "";
+}
+
+.contrib-title::after {
+  content: "：";
+  color: var(--text-tertiary);
+}
+
+.contrib-title strong {
+  font-weight: 650;
+  color: #111;
+}
+
+.project-contrib ul {
+  margin-top: 2px;
+}
+
+.project-contrib li {
+  margin-bottom: 6px;
+}
+
+.exp-block + .exp-block {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-color);
+}
+
+/* ===== 工作经历风格切换 ===== */
+.resume[data-exp-style="compact"] .exp-block + .exp-block {
+  margin-top: var(--space-3);
+  padding-top: var(--space-2);
+}
+
+.resume[data-exp-style="compact"] h3,
+.resume[data-exp-style="compact"] h4 {
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.resume[data-exp-style="compact"] .exp-subsection {
+  margin-top: var(--space-2);
+}
+
+.resume[data-exp-style="compact"] .project {
+  margin-top: var(--space-2);
+}
+
+.resume[data-exp-style="compact"] li {
+  margin-bottom: 5px;
+}
+
+.resume[data-exp-style="compact"] .project-contrib li {
+  margin-bottom: 4px;
+}
+
+.resume[data-exp-style="impact"] .metric {
+  font-weight: 650;
+  color: #111;
+}
+
+.edu-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+.edu-right {
+  white-space: nowrap;
 }
 
 .meta-list,
@@ -205,11 +374,21 @@ body {
   color: var(--text-secondary);
 }
 
+/* {{CHENGQI:
+   Action: Modified; Timestamp: 2026-01-04 15:01:00 +08:00; Reason: Task #308af31b, 调整列表间距;
+   }} */
+/* {{START MODIFICATIONS}} */
 .resume li {
-  margin-bottom: 7px;
+  margin-bottom: 8px;
   font-size: 12px;
   line-height: 1.5;
 }
+
+.resume li > strong {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+/* {{END MODIFICATIONS}} */
 
 .block {
   break-inside: avoid;
@@ -236,12 +415,23 @@ body {
   margin: 0;
 }
 
+/* {{CHENGQI:
+   Action: Modified; Timestamp: 2026-01-04 14:58:00 +08:00; Reason: Task #239b45df, 简化pill样式以优化ATS友好性;
+   }} */
+/* {{START MODIFICATIONS}} */
 .pill {
-  border: 1px solid var(--border-color);
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: #fafafa;
+  border: none;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
 }
+
+.pill:not(:last-child)::after {
+  content: " · ";
+  color: var(--text-tertiary);
+  margin: 0 4px;
+}
+/* {{END MODIFICATIONS}} */
 
 .page-break {
   break-before: page;
