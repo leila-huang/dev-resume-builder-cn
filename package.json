@@ -1,19 +1,42 @@
 {
   "name": "dev-resume-builder-cn",
-  "version": "0.0.1",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "private": true,
+  "version": "0.1.0",
+  "description": "极简单栏、ATS 友好的中文程序员简历模板生成器（React + Vite + TS）。",
+  "author": "leila",
+  "license": "ISC",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/leila-huang/dev-resume-builder-cn.git"
   },
-  "author": "leila",
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/leila-huang/dev-resume-builder-cn/issues"
   },
   "homepage": "https://github.com/leila-huang/dev-resume-builder-cn#readme",
-  "description": ""
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remark-parse": "^11.0.0",
+    "remark-stringify": "^11.0.0",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.0",
+    "@types/unist": "^3.0.2",
+    "@vitejs/plugin-react": "^4.3.2",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
+  }
 }

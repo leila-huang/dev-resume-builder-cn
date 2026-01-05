@@ -1,0 +1,579 @@
+:root {
+  color: #111;
+  background-color: #f7f7f7;
+  font-family: "Inter", "PingFang SC", "Noto Sans SC", "Microsoft YaHei",
+    sans-serif;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --border-color: #e5e5e5;
+  /* Increase contrast so “重点”更清晰（尤其是导出/打印时） */
+  --text-secondary: #1f2937; /* slate-800 */
+  --text-tertiary: #4b5563; /* slate-600 */
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: #111;
+  background-color: #f7f7f7;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.header h1 {
+  font-size: 22px;
+  margin: 0;
+}
+
+.tagline {
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1.1fr 1.2fr;
+  gap: var(--space-6);
+}
+
+.panel {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: var(--space-5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+}
+
+.panel h2 {
+  margin: 0 0 var(--space-4);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.editor {
+  width: 100%;
+  min-height: 520px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: var(--space-3);
+  font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  resize: vertical;
+  background: #fafafa;
+  color: #111;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.settings-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.settings-grid input,
+.settings-grid select {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: var(--space-2);
+  font-size: 13px;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.btn {
+  border: 1px solid #111;
+  background: #111;
+  color: #fff;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn.secondary {
+  background: #fff;
+  color: #111;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.preview-shell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.page {
+  background: #fff;
+  width: 210mm;
+  height: 297mm;
+  /* padding is controlled by runtime settings (inline style) */
+  border: 1px solid var(--border-color);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.page + .page {
+  margin-top: var(--space-6);
+}
+
+/* During PDF export (html2canvas), remove preview-only chrome to avoid borders in PDF */
+.exporting-pdf .page {
+  border: none;
+  box-shadow: none;
+}
+
+.exporting-pdf .page + .page {
+  margin-top: 0;
+}
+
+.resume {
+  /* Word-like: ONE spacing value controls all content intervals */
+  --content-gap-base: 8px; /* overridden via inline style */
+  --content-gap: var(--content-gap-base);
+}
+
+.resume h1 {
+  font-size: 26px;
+  font-weight: 600;
+  margin: 0 0 var(--space-3);
+}
+
+.resume-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-bottom: var(--space-2);
+}
+
+.resume-name {
+  margin: 0;
+}
+
+.resume-title {
+  margin-top: 2px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.resume-header-right {
+  text-align: right;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.resume-contact {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.resume-inline-item:not(:last-child)::after {
+  content: " | ";
+  color: var(--text-tertiary);
+  margin: 0 4px;
+}
+
+.resume-inline-item.contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.resume-inline-item.contact-item .contact-icon {
+  width: 12px;
+  height: 12px;
+  color: var(--text-tertiary);
+  flex: 0 0 auto;
+}
+
+.resume-inline-item.contact-item .contact-text {
+  display: inline;
+}
+
+.resume h2 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: calc(var(--content-gap) * 2.5) 0 calc(var(--content-gap) * 1.5);
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* {{CHENGQI:
+   Action: Modified; Timestamp: 2026-01-04 15:00:00 +08:00; Reason: Task #308af31b, 加粗工作经历和项目标题;
+   }} */
+/* {{START MODIFICATIONS}} */
+.resume h3 {
+  font-size: 13px;
+  margin: calc(var(--content-gap) * 2) 0 calc(var(--content-gap) * 1.2);
+  font-weight: 700;
+  color: #111;
+}
+
+.resume h4 {
+  font-size: 12px;
+  margin: calc(var(--content-gap) * 1.8) 0 calc(var(--content-gap) * 0.8);
+  font-weight: 700;
+  color: #111;
+}
+/* {{END MODIFICATIONS}} */
+
+.resume p {
+  margin: 0 0 var(--content-gap);
+  color: var(--text-secondary);
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.exp-title {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  align-items: baseline;
+}
+
+.exp-title-right {
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.exp-summary {
+  margin-top: calc(var(--content-gap) * 0.8);
+  margin-bottom: calc(var(--content-gap) * 1.2);
+  color: var(--text-secondary);
+}
+
+.exp-subsection {
+  margin-top: 10px;
+}
+
+.exp-subtitle {
+  font-weight: 700;
+  margin: calc(var(--content-gap) * 1.8) 0 calc(var(--content-gap) * 1);
+  color: #111;
+  font-size: 1.05em;
+}
+
+.exp-block-sep {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-color);
+}
+
+.project {
+  margin-top: calc(var(--content-gap) * 2);
+}
+
+.project:first-of-type {
+  margin-top: calc(var(--content-gap) * 1.5);
+}
+
+.project-contrib-heading {
+  margin-top: calc(var(--content-gap) * 1.5);
+  margin-bottom: calc(var(--content-gap) * 0.8);
+  font-weight: 700;
+  color: #111;
+  font-size: 1.02em;
+}
+
+.project-desc {
+  margin-top: calc(var(--content-gap) * 0.5);
+  margin-bottom: var(--content-gap);
+  color: var(--text-tertiary);
+  font-size: 0.98em;
+}
+
+.project-stack {
+  color: var(--text-tertiary);
+  font-size: 0.95em;
+  margin-top: calc(var(--content-gap) * 0.5);
+}
+
+.project-stack .label {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.contrib-title {
+  margin: calc(var(--content-gap) * 0.5) 0 calc(var(--content-gap) * 0.8);
+  padding-left: 20px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-size: 0.98em;
+}
+
+.contrib-title::before {
+  content: "";
+}
+
+.contrib-title::after {
+  content: "：";
+  color: var(--text-tertiary);
+}
+
+.contrib-title strong {
+  font-weight: 650;
+  color: #111;
+}
+
+.project-contrib ul {
+  margin-top: 0;
+}
+
+.project-contrib li {
+  margin: 0 0 var(--content-gap);
+}
+
+/* ===== Markdown rendering ===== */
+.md-block {
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.md-block p,
+.md-block li {
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.md-block p {
+  margin: 0 0 var(--content-gap);
+}
+
+.md-block pre {
+  margin: var(--space-2) 0;
+  padding: var(--space-2);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: #fafafa;
+  overflow: auto;
+}
+
+.md-block code {
+  font-family: inherit;
+}
+
+/* Contributions markdown block: stronger hierarchy + compact spacing */
+.md-contrib p {
+  margin: 0 0 var(--content-gap);
+  color: #111;
+}
+
+.md-contrib p:first-child {
+  margin-top: 0;
+}
+
+.md-contrib p strong {
+  font-weight: 650;
+  color: #111;
+}
+
+.md-contrib ul,
+.md-contrib ol {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--text-secondary);
+}
+
+.md-contrib p + ul,
+.md-contrib p + ol {
+  margin-top: 0;
+}
+
+.md-contrib li {
+  margin: 0 0 calc(var(--content-gap) * 1.2);
+}
+
+.md-contrib li:last-child {
+  margin-bottom: 0;
+}
+
+/* Give groups a predictable separation */
+.md-contrib ul + p,
+.md-contrib ol + p {
+  margin-top: 0;
+}
+
+.md-contrib li > strong {
+  font-weight: 650;
+  color: #111;
+}
+
+.exp-block + .exp-block {
+  margin-top: calc(var(--content-gap) * 3);
+  padding-top: calc(var(--content-gap) * 2.5);
+  border-top: 1px solid #e8e8e8;
+}
+
+/* ===== 工作经历风格切换 ===== */
+.resume[data-exp-style="compact"] .exp-block + .exp-block {
+  margin-top: var(--space-3);
+  padding-top: var(--space-2);
+}
+
+.resume[data-exp-style="compact"] h3,
+.resume[data-exp-style="compact"] h4 {
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.resume[data-exp-style="compact"] .exp-subsection {
+  margin-top: var(--space-2);
+}
+
+.resume[data-exp-style="compact"] .project {
+  margin-top: var(--space-2);
+}
+
+.resume[data-exp-style="compact"] {
+  /* spacing is controlled by --content-gap-base (same as standard) */
+}
+
+.resume[data-exp-style="compact"] .project-contrib li {
+  margin: 0 0 var(--content-gap);
+}
+
+.resume[data-exp-style="impact"] .metric {
+  font-weight: 650;
+  color: #111;
+}
+
+.edu-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+.edu-right {
+  white-space: nowrap;
+}
+
+.resume ul,
+.resume ol {
+  margin: 0 0 calc(var(--content-gap) * 1.5);
+  padding-left: 20px;
+  color: var(--text-secondary);
+}
+
+/* {{CHENGQI:
+   Action: Modified; Timestamp: 2026-01-04 15:01:00 +08:00; Reason: Task #308af31b, 调整列表间距;
+   }} */
+/* {{START MODIFICATIONS}} */
+.resume li {
+  margin: 0 0 calc(var(--content-gap) * 1.2);
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.resume li:last-child {
+  margin-bottom: calc(var(--content-gap) * 0.5);
+}
+
+.resume li > strong {
+  font-weight: 650;
+  color: #111;
+}
+/* {{END MODIFICATIONS}} */
+
+.block {
+  break-inside: avoid;
+}
+
+.meta-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.muted {
+  color: var(--text-tertiary);
+}
+
+.pill-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: 0;
+  margin: 0;
+}
+
+/* {{CHENGQI:
+   Action: Modified; Timestamp: 2026-01-04 14:58:00 +08:00; Reason: Task #239b45df, 简化pill样式以优化ATS友好性;
+   }} */
+/* {{START MODIFICATIONS}} */
+.pill {
+  border: none;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.pill:not(:last-child)::after {
+  content: " · ";
+  color: var(--text-tertiary);
+  margin: 0 4px;
+}
+/* {{END MODIFICATIONS}} */
+
+.page-break {
+  break-before: page;
+}
