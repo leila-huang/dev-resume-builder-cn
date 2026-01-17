@@ -32,6 +32,7 @@ education_gradYear: 2018
 
 #### 统一实验与增长平台
 
+- time: 2022.06-至今
 - summary: 支持百级实验并发的增长平台，覆盖流量分配、指标看板与灰度策略。
 - stack: React、TypeScript、Vite、Node、GraphQL
 - contributions:
@@ -43,6 +44,7 @@ education_gradYear: 2018
 
 #### 供应链可视化中台
 
+- time: 2021.06-2022.05
 - summary: 多业务线共享的供应链调度与异常预警中台。
 - stack: React、MobX、Ant Design、Leaflet
 - contributions:
@@ -57,6 +59,7 @@ education_gradYear: 2018
 
 #### 促销活动搭建平台
 
+- time: 2019.03-2021.05
 - summary: 拖拽式搭建与发布工具，支撑月度亿级 PV 活动页。
 - stack: React、Redux、Webpack、Node
 - contributions:

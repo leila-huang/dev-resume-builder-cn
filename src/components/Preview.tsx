@@ -143,10 +143,16 @@ const Preview = ({ resume, settings }: PreviewProps) => {
 
         exp.projects.forEach((project, pIndex) => {
           const hasContrib = !!project.contributionsMarkdown?.trim() || project.contributions.length > 0;
+          const projectTime = [project.startDate, project.endDate].filter(Boolean).join(' - ');
           blocks.push(
             <section className="block project-block" data-block key={`${blockKey}-project-${pIndex}`}>
               <div className="project">
-                <h4 style={{ fontSize: settings.headingSize - 3 }}>{project.name}</h4>
+                <h4 className="project-title" style={{ fontSize: settings.headingSize - 3 }}>
+                  <span className="project-title-left">{project.name}</span>
+                  {projectTime && (
+                    <span className="project-title-right muted">{projectTime}</span>
+                  )}
+                </h4>
                 {project.description && (
                   <p className="project-desc" style={{ fontSize: settings.bodySize, lineHeight: settings.lineHeight }}>
                     <MarkdownInline text={project.description} />

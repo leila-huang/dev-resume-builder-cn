@@ -31,6 +31,10 @@ export interface Project {
   name: string;
   description?: string;
   techStack?: string;
+  /** 项目开始时间 */
+  startDate?: string;
+  /** 项目结束时间 */
+  endDate?: string;
   /**
    * Raw markdown block for contributions (preferred).
    * Keeps author formatting like **bold**, lists, etc.

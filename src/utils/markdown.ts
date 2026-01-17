@@ -109,6 +109,7 @@ const normalizeText = (node: Content): string => {
 const KEY_RESPONSIBILITY = "responsibility";
 const KEY_SUMMARY = "summary";
 const KEY_STACK = "stack";
+const KEY_TIME = "time";
 const KEY_CONTRIBUTIONS = "contributions";
 
 const extractKeyAndMaybeValue = (
@@ -389,6 +390,15 @@ export const parseMarkdown = (markdown: string): Resume => {
             currentProject.techStack = kv.value;
             continue;
           }
+          if (kv?.key === KEY_TIME) {
+            // 解析项目时间，支持格式如 "2021.06-2022.09" 或 "2021.06 - 2022.09"
+            const [startDate = "", endDate = ""] = kv.value
+              .split(/[-–—]/)
+              .map((s) => s.trim());
+            currentProject.startDate = startDate;
+            currentProject.endDate = endDate || undefined;
+            continue;
+          }
 
           const isContributions =
             kv?.key === KEY_CONTRIBUTIONS || keyOnly?.key === KEY_CONTRIBUTIONS;
@@ -450,6 +460,7 @@ export const parseMarkdown = (markdown: string): Resume => {
               if (
                 nextKv?.key === KEY_SUMMARY ||
                 nextKv?.key === KEY_STACK ||
+                nextKv?.key === KEY_TIME ||
                 nextKv?.key === KEY_CONTRIBUTIONS
               )
                 break;
@@ -580,6 +591,12 @@ export const resumeToMarkdown = (resume: Resume): string => {
     }
     exp.projects.forEach((project) => {
       lines.push("", `#### ${project.name}`);
+      if (project.startDate || project.endDate) {
+        const timeStr = [project.startDate, project.endDate]
+          .filter(Boolean)
+          .join("-");
+        lines.push(`- ${KEY_TIME}: ${timeStr}`);
+      }
       if (project.description)
         lines.push(`- ${KEY_SUMMARY}: ${project.description}`);
       if (project.techStack) lines.push(`- ${KEY_STACK}: ${project.techStack}`);
