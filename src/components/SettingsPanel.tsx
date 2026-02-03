@@ -1,4 +1,4 @@
-import type { ExperienceStyle, TypographySettings } from '../types/resume';
+import type { ExperienceStyle, ResumeTheme, TypographySettings } from '../types/resume';
 
 interface SettingsPanelProps {
   settings: TypographySettings;
@@ -15,6 +15,14 @@ const experienceStyleOptions: { value: ExperienceStyle; label: string }[] = [
   { value: 'standard', label: '标准（推荐）' },
   { value: 'compact', label: '紧凑（内容多）' },
   { value: 'impact', label: '强调成果（指标高亮）' }
+];
+
+const themeOptions: { value: ResumeTheme; label: string }[] = [
+  { value: 'neutral', label: '经典黑灰' },
+  { value: 'slate-blue', label: '蓝灰清爽' },
+  { value: 'teal', label: '青绿雅致' },
+  { value: 'olive', label: '橄榄柔和' },
+  { value: 'amber', label: '暖琥珀' }
 ];
 
 const SettingsPanel = ({ settings, onChange }: SettingsPanelProps) => {
@@ -101,6 +109,19 @@ const SettingsPanel = ({ settings, onChange }: SettingsPanelProps) => {
             onChange={(e) => onChange({ ...settings, experienceStyle: e.target.value as ExperienceStyle })}
           >
             {experienceStyleOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          配色方案（仅预览）
+          <select
+            value={settings.theme}
+            onChange={(e) => onChange({ ...settings, theme: e.target.value as ResumeTheme })}
+          >
+            {themeOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>

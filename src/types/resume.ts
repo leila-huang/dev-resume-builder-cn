@@ -68,6 +68,7 @@ export interface Resume {
 }
 
 export type ExperienceStyle = "standard" | "compact" | "impact";
+export type ResumeTheme = "neutral" | "slate-blue" | "teal" | "olive" | "amber";
 
 export interface TypographySettings {
   bodySize: number;
@@ -76,6 +77,7 @@ export interface TypographySettings {
   lineHeight: number;
   fontFamily: string;
   experienceStyle: ExperienceStyle;
+  theme: ResumeTheme;
   /**
    * Word-like spacing between content blocks (paragraphs / list items), in px.
    * Use ONE value to avoid element-specific special cases.

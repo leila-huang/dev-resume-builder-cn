@@ -254,6 +254,7 @@ const Preview = ({ resume, settings }: PreviewProps) => {
             className="page"
             data-page
             key={`page-${idx}`}
+            data-theme={settings.theme}
             style={{
               paddingTop: `${settings.pagePaddingTopMm}mm`,
               paddingBottom: `${settings.pagePaddingBottomMm}mm`,

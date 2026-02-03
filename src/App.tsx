@@ -15,6 +15,7 @@ const defaultSettings: TypographySettings = {
   lineHeight: 1.4,
   fontFamily: 'Inter, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif',
   experienceStyle: 'standard',
+  theme: 'neutral',
   contentGapPx: 8,
   pagePaddingTopMm: 8,
   pagePaddingBottomMm: 8,
