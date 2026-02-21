@@ -1,4 +1,5 @@
 export interface Contact {
+  age?: string;
   email?: string;
   phone?: string;
   wechat?: string;

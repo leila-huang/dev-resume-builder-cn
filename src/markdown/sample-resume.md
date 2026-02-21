@@ -3,6 +3,7 @@ name: 张三
 gender: 男
 yearsExp: 7年
 title: 高级前端工程师
+age: 29
 phone: +86 138-0000-0000
 email: zhangsan@example.com
 wechat: zhangsan

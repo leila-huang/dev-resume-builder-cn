@@ -36,6 +36,7 @@ const Preview = ({ resume, settings }: PreviewProps) => {
     ].filter(Boolean);
 
     const contactItems = [
+      { type: 'age' as const, text: resume.basics.contact?.age },
       { type: 'phone' as const, text: resume.basics.contact?.phone },
       { type: 'email' as const, text: resume.basics.contact?.email },
       { type: 'wechat' as const, text: resume.basics.contact?.wechat },
