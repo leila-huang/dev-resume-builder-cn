@@ -1,4 +1,5 @@
 export interface Contact {
+  age?: string;
   email?: string;
   phone?: string;
   wechat?: string;
@@ -31,6 +32,10 @@ export interface Project {
   name: string;
   description?: string;
   techStack?: string;
+  /** 项目开始时间 */
+  startDate?: string;
+  /** 项目结束时间 */
+  endDate?: string;
   /**
    * Raw markdown block for contributions (preferred).
    * Keeps author formatting like **bold**, lists, etc.
@@ -64,6 +69,7 @@ export interface Resume {
 }
 
 export type ExperienceStyle = "standard" | "compact" | "impact";
+export type ResumeTheme = "neutral" | "slate-blue" | "teal" | "olive" | "amber";
 
 export interface TypographySettings {
   bodySize: number;
@@ -72,6 +78,7 @@ export interface TypographySettings {
   lineHeight: number;
   fontFamily: string;
   experienceStyle: ExperienceStyle;
+  theme: ResumeTheme;
   /**
    * Word-like spacing between content blocks (paragraphs / list items), in px.
    * Use ONE value to avoid element-specific special cases.

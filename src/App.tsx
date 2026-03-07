@@ -8,6 +8,9 @@ import { parseMarkdown, resumeToMarkdown } from './utils/markdown';
 import { exportPdfFromPages, printWithStyles } from './utils/pdf';
 import type { Resume, TypographySettings } from './types/resume';
 
+const MARKDOWN_CACHE_KEY = 'resume-markdown-cache-v1';
+const SETTINGS_CACHE_KEY = 'resume-typography-settings-cache-v1';
+
 const defaultSettings: TypographySettings = {
   bodySize: 12,
   headingSize: 15,
@@ -15,6 +18,7 @@ const defaultSettings: TypographySettings = {
   lineHeight: 1.4,
   fontFamily: 'Inter, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif',
   experienceStyle: 'standard',
+  theme: 'neutral',
   contentGapPx: 8,
   pagePaddingTopMm: 8,
   pagePaddingBottomMm: 8,
@@ -22,11 +26,76 @@ const defaultSettings: TypographySettings = {
   pagePaddingRightMm: 8
 };
 
+const getInitialEditorState = (): { markdown: string; restoredFromCache: boolean } => {
+  if (typeof window === 'undefined') return { markdown: sampleMarkdown, restoredFromCache: false };
+  try {
+    const cached = window.localStorage.getItem(MARKDOWN_CACHE_KEY);
+    if (cached === null || cached === sampleMarkdown) {
+      return { markdown: sampleMarkdown, restoredFromCache: false };
+    }
+    return { markdown: cached, restoredFromCache: true };
+  } catch {
+    return { markdown: sampleMarkdown, restoredFromCache: false };
+  }
+};
+
+const isObject = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === 'object' && value !== null;
+};
+
+const getInitialSettings = (): TypographySettings => {
+  if (typeof window === 'undefined') return defaultSettings;
+  try {
+    const raw = window.localStorage.getItem(SETTINGS_CACHE_KEY);
+    if (raw === null) return defaultSettings;
+    const parsed: unknown = JSON.parse(raw);
+    if (!isObject(parsed)) return defaultSettings;
+    return { ...defaultSettings, ...parsed } as TypographySettings;
+  } catch {
+    return defaultSettings;
+  }
+};
+
+const isDefaultSettings = (settings: TypographySettings): boolean =>
+  (Object.keys(defaultSettings) as (keyof TypographySettings)[]).every(
+    (key) => settings[key] === defaultSettings[key]
+  );
+
 function App() {
-  const [markdown, setMarkdown] = useState<string>(sampleMarkdown);
-  const [resume, setResume] = useState<Resume>(() => parseMarkdown(sampleMarkdown));
-  const [settings, setSettings] = useState<TypographySettings>(defaultSettings);
+  const initialState = useMemo(() => getInitialEditorState(), []);
+  const initialMarkdown = initialState.markdown;
+  const restoredFromCache = initialState.restoredFromCache;
+  const [markdown, setMarkdown] = useState<string>(initialMarkdown);
+  const [resume, setResume] = useState<Resume>(() => parseMarkdown(initialMarkdown));
+  const [settings, setSettings] = useState<TypographySettings>(() => getInitialSettings());
   const [parseError, setParseError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const isDefaultSample = markdown === sampleMarkdown;
+    try {
+      if (isDefaultSample) {
+        window.localStorage.removeItem(MARKDOWN_CACHE_KEY);
+      } else {
+        window.localStorage.setItem(MARKDOWN_CACHE_KEY, markdown);
+      }
+    } catch {
+      // Ignore localStorage failures (e.g. private mode / quota / blocked storage).
+    }
+  }, [markdown]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      if (isDefaultSettings(settings)) {
+        window.localStorage.removeItem(SETTINGS_CACHE_KEY);
+      } else {
+        window.localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(settings));
+      }
+    } catch {
+      // Ignore localStorage failures (e.g. private mode / quota / blocked storage).
+    }
+  }, [settings]);
 
   useEffect(() => {
     try {
@@ -71,7 +140,12 @@ function App() {
 
       <div className="layout">
         <div className="panel">
-          <MdEditor value={markdown} onChange={setMarkdown} onReset={() => setMarkdown(sampleMarkdown)} />
+          <MdEditor
+            value={markdown}
+            onChange={setMarkdown}
+            onReset={() => setMarkdown(sampleMarkdown)}
+            restoredFromCache={restoredFromCache}
+          />
           <SettingsPanel settings={settings} onChange={setSettings} />
           <ExportActions
             onExportMarkdown={handleExportMarkdown}

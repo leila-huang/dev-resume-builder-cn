@@ -156,14 +156,61 @@ body {
 }
 
 .page {
-  background: #fff;
+  --resume-text-primary: #111827;
+  --resume-text-secondary: #1f2937;
+  --resume-text-tertiary: #4b5563;
+  --resume-border-color: #e5e7eb;
+  --resume-accent: #1d4ed8;
+  background: #ffffff;
   width: 210mm;
   height: 297mm;
   /* padding is controlled by runtime settings (inline style) */
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--resume-border-color);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
   margin: 0 auto;
   overflow: hidden;
+}
+
+/* ===== Resume theme palettes (preview only) =====
+   You can tweak these CSS variables to adjust the color schemes. */
+.page[data-theme="neutral"] {
+  --resume-text-primary: #111827;
+  --resume-text-secondary: #1f2937;
+  --resume-text-tertiary: #4b5563;
+  --resume-border-color: #e5e7eb;
+  --resume-accent: #1d4ed8;
+}
+
+.page[data-theme="slate-blue"] {
+  --resume-text-primary: #0f172a;
+  --resume-text-secondary: #1e293b;
+  --resume-text-tertiary: #475569;
+  --resume-border-color: #dbe3f1;
+  --resume-accent: #2563eb;
+}
+
+.page[data-theme="teal"] {
+  --resume-text-primary: #0f172a;
+  --resume-text-secondary: #1f3b3a;
+  --resume-text-tertiary: #4c6b69;
+  --resume-border-color: #d4e5e3;
+  --resume-accent: #0f766e;
+}
+
+.page[data-theme="olive"] {
+  --resume-text-primary: #1c2a24;
+  --resume-text-secondary: #2f3b34;
+  --resume-text-tertiary: #56665f;
+  --resume-border-color: #dde7df;
+  --resume-accent: #2f6f4e;
+}
+
+.page[data-theme="amber"] {
+  --resume-text-primary: #2a1b0f;
+  --resume-text-secondary: #3f2a1b;
+  --resume-text-tertiary: #6b4a30;
+  --resume-border-color: #f0e0cd;
+  --resume-accent: #b45309;
 }
 
 .page + .page {
@@ -184,6 +231,11 @@ body {
   /* Word-like: ONE spacing value controls all content intervals */
   --content-gap-base: 8px; /* overridden via inline style */
   --content-gap: var(--content-gap-base);
+  color: var(--resume-text-primary);
+}
+
+.resume strong {
+  color: var(--resume-accent);
 }
 
 .resume h1 {
@@ -207,25 +259,25 @@ body {
 .resume-title {
   margin-top: 2px;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--resume-text-secondary);
 }
 
 .resume-header-right {
   text-align: right;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: var(--resume-text-secondary);
   white-space: nowrap;
 }
 
 .resume-contact {
-  color: var(--text-secondary);
+  color: var(--resume-text-secondary);
   line-height: 1.6;
   word-break: break-word;
 }
 
 .resume-inline-item:not(:last-child)::after {
   content: " | ";
-  color: var(--text-tertiary);
+  color: var(--resume-text-tertiary);
   margin: 0 4px;
 }
 
@@ -238,7 +290,7 @@ body {
 .resume-inline-item.contact-item .contact-icon {
   width: 12px;
   height: 12px;
-  color: var(--text-tertiary);
+  color: var(--resume-text-tertiary);
   flex: 0 0 auto;
 }
 
@@ -251,7 +303,7 @@ body {
   font-weight: 600;
   margin: calc(var(--content-gap) * 2.5) 0 calc(var(--content-gap) * 1.5);
   padding-bottom: 4px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--resume-border-color);
 }
 
 /* {{CHENGQI:
@@ -262,20 +314,32 @@ body {
   font-size: 13px;
   margin: calc(var(--content-gap) * 2) 0 calc(var(--content-gap) * 1.2);
   font-weight: 700;
-  color: #111;
+  color: var(--resume-accent);
 }
 
 .resume h4 {
   font-size: 12px;
   margin: calc(var(--content-gap) * 1.8) 0 calc(var(--content-gap) * 0.8);
   font-weight: 700;
-  color: #111;
+  color: var(--resume-accent);
+}
+
+.project-title {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  align-items: baseline;
+}
+
+.project-title-right {
+  font-weight: 400;
+  white-space: nowrap;
 }
 /* {{END MODIFICATIONS}} */
 
 .resume p {
   margin: 0 0 var(--content-gap);
-  color: var(--text-secondary);
+  color: var(--resume-text-secondary);
   font-size: inherit;
   line-height: inherit;
 }
@@ -295,7 +359,7 @@ body {
 .exp-summary {
   margin-top: calc(var(--content-gap) * 0.8);
   margin-bottom: calc(var(--content-gap) * 1.2);
-  color: var(--text-secondary);
+  color: var(--resume-text-secondary);
 }
 
 .exp-subsection {
@@ -305,14 +369,14 @@ body {
 .exp-subtitle {
   font-weight: 700;
   margin: calc(var(--content-gap) * 1.8) 0 calc(var(--content-gap) * 1);
-  color: #111;
+  color: var(--resume-accent);
   font-size: 1.05em;
 }
 
 .exp-block-sep {
   margin-top: var(--space-4);
   padding-top: var(--space-3);
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--resume-border-color);
 }
 
 .project {
@@ -327,33 +391,33 @@ body {
   margin-top: calc(var(--content-gap) * 1.5);
   margin-bottom: calc(var(--content-gap) * 0.8);
   font-weight: 700;
-  color: #111;
+  color: var(--resume-accent);
   font-size: 1.02em;
 }
 
 .project-desc {
   margin-top: calc(var(--content-gap) * 0.5);
   margin-bottom: var(--content-gap);
-  color: var(--text-tertiary);
+  color: var(--resume-text-tertiary);
   font-size: 0.98em;
 }
 
 .project-stack {
-  color: var(--text-tertiary);
+  color: var(--resume-text-tertiary);
   font-size: 0.95em;
   margin-top: calc(var(--content-gap) * 0.5);
 }
 
 .project-stack .label {
   font-weight: 500;
-  color: var(--text-secondary);
+  color: var(--resume-text-secondary);
 }
 
 .contrib-title {
   margin: calc(var(--content-gap) * 0.5) 0 calc(var(--content-gap) * 0.8);
   padding-left: 20px;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: var(--resume-text-secondary);
   font-size: 0.98em;
 }
 
@@ -363,12 +427,12 @@ body {
 
 .contrib-title::after {
   content: "：";
-  color: var(--text-tertiary);
+  color: var(--resume-text-tertiary);
 }
 
 .contrib-title strong {
   font-weight: 650;
-  color: #111;
+  color: var(--resume-accent);
 }
 
 .project-contrib ul {
@@ -411,7 +475,7 @@ body {
 /* Contributions markdown block: stronger hierarchy + compact spacing */
 .md-contrib p {
   margin: 0 0 var(--content-gap);
-  color: #111;
+  color: var(--resume-text-primary);
 }
 
 .md-contrib p:first-child {
@@ -420,14 +484,14 @@ body {
 
 .md-contrib p strong {
   font-weight: 650;
-  color: #111;
+  color: var(--resume-accent);
 }
 
 .md-contrib ul,
 .md-contrib ol {
   margin: 0;
   padding-left: 20px;
-  color: var(--text-secondary);
+  color: var(--resume-text-secondary);
 }
 
 .md-contrib p + ul,
@@ -451,13 +515,13 @@ body {
 
 .md-contrib li > strong {
   font-weight: 650;
-  color: #111;
+  color: var(--resume-accent);
 }
 
 .exp-block + .exp-block {
   margin-top: calc(var(--content-gap) * 3);
   padding-top: calc(var(--content-gap) * 2.5);
-  border-top: 1px solid #e8e8e8;
+  border-top: 1px solid var(--resume-border-color);
 }
 
 /* ===== 工作经历风格切换 ===== */
@@ -490,7 +554,7 @@ body {
 
 .resume[data-exp-style="impact"] .metric {
   font-weight: 650;
-  color: #111;
+  color: var(--resume-accent);
 }
 
 .edu-row {
@@ -508,7 +572,7 @@ body {
 .resume ol {
   margin: 0 0 calc(var(--content-gap) * 1.5);
   padding-left: 20px;
-  color: var(--text-secondary);
+  color: var(--resume-text-secondary);
 }
 
 /* {{CHENGQI:
@@ -527,7 +591,7 @@ body {
 
 .resume li > strong {
   font-weight: 650;
-  color: #111;
+  color: var(--resume-accent);
 }
 /* {{END MODIFICATIONS}} */
 
@@ -543,8 +607,8 @@ body {
   font-size: 12px;
 }
 
-.muted {
-  color: var(--text-tertiary);
+.resume .muted {
+  color: var(--resume-text-tertiary);
 }
 
 .pill-list {

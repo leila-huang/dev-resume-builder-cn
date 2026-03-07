@@ -1,20 +1,19 @@
-import { unified } from "unified";
-import remarkParse from "remark-parse";
-import remarkStringify from "remark-stringify";
 import type {
-  Root,
+  Content,
+  Emphasis,
   Heading,
+  InlineCode,
+  Link,
   List,
   ListItem,
   Paragraph,
-  Text,
-  Content,
+  Root,
   Strong,
-  Emphasis,
-  InlineCode,
-  Link,
-  Break,
+  Text,
 } from "mdast";
+import remarkParse from "remark-parse";
+import remarkStringify from "remark-stringify";
+import { unified } from "unified";
 import type {
   Basics,
   ContributionGroup,
@@ -44,7 +43,7 @@ const identifySectionType = (title: string): string | null => {
   // 核心能力/技能变体识别
   if (
     /^(核心能力|技能|专业技能|技术能力|核心竞争力|技术栈|个人优势|个人亮点)$/.test(
-      normalized
+      normalized,
     )
   ) {
     return SECTION_TYPE_CORE;
@@ -109,10 +108,11 @@ const normalizeText = (node: Content): string => {
 const KEY_RESPONSIBILITY = "responsibility";
 const KEY_SUMMARY = "summary";
 const KEY_STACK = "stack";
+const KEY_TIME = "time";
 const KEY_CONTRIBUTIONS = "contributions";
 
 const extractKeyAndMaybeValue = (
-  text: string
+  text: string,
 ):
   | { key: string; value: string }
   | { key: string; value?: undefined }
@@ -166,7 +166,7 @@ const extractNestedListItems = (item: ListItem): string[] => {
 };
 
 const extractKeyValue = (
-  text: string
+  text: string,
 ): { key: string; value: string } | null => {
   // 支持英文/中文冒号；同时允许 value 内出现冒号
   const match = text.match(/^([^:：]+)[:：]\s*(.+)$/);
@@ -257,7 +257,7 @@ export const parseMarkdown = (markdown: string): Resume => {
   };
 
   const tree = processor.parse(
-    normalizeContributionsIndent(lines.slice(cursor).join("\n"))
+    normalizeContributionsIndent(lines.slice(cursor).join("\n")),
   ) as Root;
   const resume: Resume = {
     basics: { name: "", contact: {} },
@@ -389,6 +389,15 @@ export const parseMarkdown = (markdown: string): Resume => {
             currentProject.techStack = kv.value;
             continue;
           }
+          if (kv?.key === KEY_TIME) {
+            // 解析项目时间，支持格式如 "2021.06-2022.09" 或 "2021.06 - 2022.09"
+            const [startDate = "", endDate = ""] = kv.value
+              .split(/[-–—]/)
+              .map((s) => s.trim());
+            currentProject.startDate = startDate;
+            currentProject.endDate = endDate || undefined;
+            continue;
+          }
 
           const isContributions =
             kv?.key === KEY_CONTRIBUTIONS || keyOnly?.key === KEY_CONTRIBUTIONS;
@@ -396,7 +405,7 @@ export const parseMarkdown = (markdown: string): Resume => {
             const li = item;
             const children = (li.children || []) as Content[];
             const nestedList = children.find(
-              (child) => child.type === "list"
+              (child) => child.type === "list",
             ) as List | undefined;
 
             // Heuristic: if it's exactly the legacy nested-list groups format, keep old parsing for nicer layout
@@ -405,8 +414,8 @@ export const parseMarkdown = (markdown: string): Resume => {
               nestedList.children.length > 0 &&
               nestedList.children.every((c) =>
                 (c as ListItem).children?.some(
-                  (cc) => (cc as Content).type === "list"
-                )
+                  (cc) => (cc as Content).type === "list",
+                ),
               );
 
             if (looksLikeLegacyGroups && nestedList) {
@@ -450,13 +459,14 @@ export const parseMarkdown = (markdown: string): Resume => {
               if (
                 nextKv?.key === KEY_SUMMARY ||
                 nextKv?.key === KEY_STACK ||
+                nextKv?.key === KEY_TIME ||
                 nextKv?.key === KEY_CONTRIBUTIONS
               )
                 break;
 
               const nextChildren = (nextItem.children || []) as Content[];
               const nextNestedList = nextChildren.find(
-                (c) => c.type === "list"
+                (c) => c.type === "list",
               ) as List | undefined;
               const title = nextText.trim();
               if (title) parts.push(title);
@@ -492,6 +502,7 @@ export const parseMarkdown = (markdown: string): Resume => {
       yearsOfExperience: fm.yearsexp || resume.basics.yearsOfExperience,
       title: fm.title || resume.basics.title,
       contact: {
+        age: fm.age || resume.basics.contact?.age,
         phone: fm.phone || resume.basics.contact?.phone,
         email: fm.email || resume.basics.contact?.email,
         wechat: fm.wechat || resume.basics.contact?.wechat,
@@ -543,6 +554,8 @@ export const resumeToMarkdown = (resume: Resume): string => {
     if (resume.basics.yearsOfExperience)
       fm.push(`yearsExp: ${resume.basics.yearsOfExperience}`);
     if (resume.basics.title) fm.push(`title: ${resume.basics.title}`);
+    if (resume.basics.contact?.age)
+      fm.push(`age: ${resume.basics.contact.age}`);
     if (resume.basics.contact?.phone)
       fm.push(`phone: ${resume.basics.contact.phone}`);
     if (resume.basics.contact?.email)
@@ -551,7 +564,7 @@ export const resumeToMarkdown = (resume: Resume): string => {
       fm.push(`wechat: ${resume.basics.contact.wechat}`);
     if (resume.basics.location || resume.basics.contact?.city)
       fm.push(
-        `location: ${resume.basics.location || resume.basics.contact?.city}`
+        `location: ${resume.basics.location || resume.basics.contact?.city}`,
       );
     if (resume.basics.github) fm.push(`github: ${resume.basics.github}`);
     if (resume.basics.website) fm.push(`website: ${resume.basics.website}`);
@@ -573,13 +586,19 @@ export const resumeToMarkdown = (resume: Resume): string => {
   lines.push("", `## ${SECTION_WORK}`, "");
   resume.experiences.forEach((exp) => {
     lines.push(
-      `### ${exp.position} ｜ ${exp.company} ｜ ${exp.start}–${exp.end}`
+      `### ${exp.position} ｜ ${exp.company} ｜ ${exp.start}–${exp.end}`,
     );
     if (exp.responsibilities) {
       lines.push(`- ${KEY_RESPONSIBILITY}: ${exp.responsibilities}`);
     }
     exp.projects.forEach((project) => {
       lines.push("", `#### ${project.name}`);
+      if (project.startDate || project.endDate) {
+        const timeStr = [project.startDate, project.endDate]
+          .filter(Boolean)
+          .join("-");
+        lines.push(`- ${KEY_TIME}: ${timeStr}`);
+      }
       if (project.description)
         lines.push(`- ${KEY_SUMMARY}: ${project.description}`);
       if (project.techStack) lines.push(`- ${KEY_STACK}: ${project.techStack}`);
