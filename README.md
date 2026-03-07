@@ -61,6 +61,7 @@
    gender: 男
    yearsExp: 7年
    title: 前端开发工程师
+   age: 29
    phone: +86 1xx-xxxx-xxxx
    email: hi@example.com
    wechat: wechat-id
@@ -113,6 +114,7 @@ export interface Resume {
     github?: string;
     website?: string;
     contact?: {
+      age?: string;
       email?: string;
       phone?: string;
       wechat?: string;
